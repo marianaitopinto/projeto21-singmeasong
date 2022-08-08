@@ -65,8 +65,48 @@ describe("upvote recommendations", () => {
   it("should not increase 1 point", async () => {
     jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
 
-    const promise = recommendationService.upvote(0);
+    const response = recommendationService.upvote(0);
 
-    expect(promise).rejects.toEqual({ message: "", type: "not_found" });
+    expect(response).rejects.toEqual({ message: "", type: "not_found" });
+  });
+});
+
+describe("downvote recommendations", () => {
+  it("should decrease 1 point to recommendation score", async () => {
+    const data = await recommentationWithScore();
+
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(data);
+
+    jest
+      .spyOn(recommendationRepository, "updateScore")
+      .mockResolvedValueOnce(data);
+
+    await recommendationService.downvote(data.id);
+
+    expect(recommendationRepository.updateScore).toHaveBeenCalled();
+  });
+
+  it("should remove a recommendation with score less than -5", async () => {
+    const data = await recommentationWithScore();
+
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(data);
+
+    jest
+      .spyOn(recommendationRepository, "updateScore")
+      .mockResolvedValueOnce({ ...data, score: -6 });
+
+    jest.spyOn(recommendationRepository, "remove").mockResolvedValueOnce();
+
+    await recommendationService.downvote(data.id);
+
+    expect(recommendationRepository.remove).toBeCalledTimes(1);
+  });
+
+  it("should not decrease 1 point", async () => {
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
+
+    const response = recommendationService.downvote(0);
+
+    expect(response).rejects.toEqual({ message: "", type: "not_found" });
   });
 });
