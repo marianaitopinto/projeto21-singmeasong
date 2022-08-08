@@ -3,7 +3,10 @@ import { prisma } from "../../src/database";
 
 import { recommendationService } from "../../src/services/recommendationsService";
 import { recommendationRepository } from "../../src/repositories/recommendationRepository";
-import { newRecommendation } from "../factories/recommendation";
+import {
+  newRecommendation,
+  recommentationWithScore,
+} from "../factories/recommendation";
 
 beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE recommendations RESTART IDENTITY CASCADE`;
@@ -41,5 +44,29 @@ describe("create recommendation", () => {
       message: "Recommendations names must be unique",
       type: "conflict",
     });
+  });
+});
+
+describe("upvote recommendations", () => {
+  it("should increase 1 point to recommendation score", async () => {
+    const data = recommentationWithScore();
+
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(data);
+
+    jest
+      .spyOn(recommendationRepository, "updateScore")
+      .mockResolvedValueOnce(data);
+
+    await recommendationService.upvote(data.id);
+
+    expect(recommendationRepository.updateScore).toBeCalledTimes(1);
+  });
+
+  it("should not increase 1 point", async () => {
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(null);
+
+    const promise = recommendationService.upvote(0);
+
+    expect(promise).rejects.toEqual({ message: "", type: "not_found" });
   });
 });
