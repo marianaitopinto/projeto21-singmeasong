@@ -6,6 +6,7 @@ import { recommendationRepository } from "../../src/repositories/recommendationR
 import {
   newRecommendation,
   recommentationWithScore,
+  recommendations,
 } from "../factories/recommendation";
 
 beforeEach(async () => {
@@ -108,5 +109,109 @@ describe("downvote recommendations", () => {
     const response = recommendationService.downvote(0);
 
     expect(response).rejects.toEqual({ message: "", type: "not_found" });
+  });
+});
+
+describe("get recommendations", () => {
+  it("should return a recommendation", async () => {
+    const data = await recommentationWithScore();
+
+    jest.spyOn(recommendationRepository, "find").mockResolvedValueOnce(data);
+
+    await recommendationService.getById(data.id);
+
+    expect(recommendationRepository.find).toHaveBeenCalled();
+  });
+
+  it("should not return a recommendation", async () => {
+    const data = await recommentationWithScore();
+
+    jest
+      .spyOn(recommendationRepository, "find")
+      .mockResolvedValueOnce(undefined);
+
+    const response = recommendationService.getById(0);
+
+    expect(response).rejects.toEqual({ message: "", type: "not_found" });
+  });
+
+  it("should return top recommendations", async () => {
+    const getAmountByScore = jest
+      .spyOn(recommendationRepository, "getAmountByScore")
+      .mockResolvedValueOnce([]);
+
+    await recommendationService.getTop(0);
+
+    expect(getAmountByScore).toBeCalledTimes(1);
+  });
+
+  it("should return all recommendations", async () => {
+    const data = await recommendations();
+
+    jest.spyOn(recommendationRepository, "findAll").mockResolvedValueOnce(data);
+
+    await recommendationService.get();
+
+    expect(recommendationRepository.findAll).toHaveBeenCalled();
+  });
+
+  it("should not return random recommendations", async () => {
+    jest.spyOn(recommendationRepository, "findAll").mockResolvedValueOnce([]);
+
+    const response = recommendationService.getRandom();
+
+    expect(response).rejects.toEqual({ message: "", type: "not_found" });
+  });
+
+  it("get random recommendation 70", async () => {
+    const data = [
+      {
+        id: 2,
+        name: "Tortinha de massa de pastel de queijo e bacon",
+        youtubeLink: "https://www.youtube.com/watch?v=VGT5vfeSnqw",
+        score: 5,
+      },
+      {
+        id: 5,
+        name: "Vaca atolada mineira original",
+        youtubeLink: "https://www.youtube.com/watch?v=bBvGlJJpE_E",
+        score: 100,
+      },
+    ];
+
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.5);
+
+    jest
+      .spyOn(recommendationRepository, "findAll")
+      .mockResolvedValueOnce([data[1]]);
+
+    const response = await recommendationService.getRandom();
+
+    expect(response.score).toEqual(data[1].score);
+  });
+
+  it("should return random recommendation", async () => {
+    const data = [
+      {
+        id: 2,
+        name: "Tortinha de massa de pastel de queijo e bacon",
+        youtubeLink: "https://www.youtube.com/watch?v=VGT5vfeSnqw",
+        score: 5,
+      },
+      {
+        id: 5,
+        name: "Vaca atolada mineira original",
+        youtubeLink: "https://www.youtube.com/watch?v=bBvGlJJpE_E",
+        score: 100,
+      },
+    ];
+
+    jest.spyOn(Math, "random").mockReturnValueOnce(0.9);
+
+    jest.spyOn(recommendationRepository, "findAll").mockResolvedValueOnce(data);
+
+    const response = await recommendationService.getRandom();
+
+    expect(response).not.toBeNull();
   });
 });

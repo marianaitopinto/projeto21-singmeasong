@@ -20,3 +20,28 @@ export function recommentationWithScore() {
 
   return recommendation;
 }
+
+export function recommendations() {
+  const recommendations = [
+    {
+      id: 2,
+      name: "Tortinha de massa de pastel de queijo e bacon",
+      youtubeLink: "https://www.youtube.com/watch?v=VGT5vfeSnqw",
+      score: 6,
+    },
+    {
+      id: 5,
+      name: "Vaca atolada mineira original",
+      youtubeLink: "https://www.youtube.com/watch?v=bBvGlJJpE_E",
+      score: 66,
+    },
+    {
+      id: 6,
+      name: "Arroz carreteiro",
+      youtubeLink: "https://www.youtube.com/watch?v=vHsSJfViGmI",
+      score: 75,
+    },
+  ];
+
+  return recommendations;
+}
