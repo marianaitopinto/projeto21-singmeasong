@@ -1,9 +1,7 @@
-import { jest } from "@jest/globals";
 import { prisma } from "../../src/database";
 import supertest from "supertest";
 import app from "../../src/app";
-import { recommendationService } from "../../src/services/recommendationsService";
-import { recommendationRepository } from "../../src/repositories/recommendationRepository";
+
 import {
   newRecommendation,
   recommentationWithScore,
@@ -55,5 +53,55 @@ describe("post recommendation", () => {
     const response = await supertest(app).post("/recommendations").send(data);
 
     expect(response.statusCode).toBe(422);
+  });
+});
+
+describe("upvote recommendation", () => {
+  /*it("should increase 1 point to recommendation", async () => {
+    const recommendation = await recommentationWithScore();
+
+    const response = await supertest(app).post(
+      `/recommendations/${recommendation.id}/upvote`
+    );
+
+    expect(response.statusCode).toBe(200);
+
+    const savedRecommendation = await prisma.recommendation.findFirst({
+      where: { name: recommendation.name },
+    });
+
+    expect(savedRecommendation.score).toBeGreaterThan(recommendation.score);
+  });*/
+
+  it("should increase 1 point to recommendation", async () => {
+    const data = await newRecommendation();
+    const insert = await supertest(app).post("/recommendations").send(data);
+
+    expect(insert.statusCode).toBe(201);
+
+    const recommendation = await prisma.recommendation.findFirst({
+      where: {
+        name: data.name,
+      },
+    });
+
+    const response = await supertest(app).post(
+      `/recommendations/${recommendation.id}/upvote`
+    );
+    expect(response.status).toBe(200);
+
+    const verifyScore = await prisma.recommendation.findFirst({
+      where: {
+        name: data.name,
+      },
+    });
+    
+    expect(verifyScore.score).toBeGreaterThan(recommendation.score);
+  });
+
+  it("should not update with a invalid id, should return 404", async () => {
+    const response = await supertest(app).post(`/recommendations/1/upvote`);
+
+    expect(response.status).toBe(404);
   });
 });
