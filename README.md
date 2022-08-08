@@ -20,7 +20,7 @@ O objetivo principal do projeto foi colocar em prática os diversos tipos de tes
 
 ---
 
-## Rodando a aplicação
+## Para rodar a aplicação
 ### Back-End 
 
 Realizar o git clone:
@@ -40,7 +40,7 @@ Iniciar o servidor
 npm run dev
 ```
 
----
+
 
 ### Front-End
 
