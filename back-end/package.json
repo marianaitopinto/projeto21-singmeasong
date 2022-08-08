@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "description": "",
-  "main": "index.js",
+  "main": "server.ts",
   "scripts": {
-    "dev:test": "dotenv -e .env.test nodemon src/server.ts",
+    "dev:test": "dotenv -e .env.test nodemon src/server",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest -- -i",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test jest -- -i --coverage --testPathPattern=tests/unit",
     "test:int":"npx dotenv-cli -e .env.test jest -- -i --testPathPattern=tests/integration",
-    "dev": "nodemon src/server.ts",
-    "start": "ts-node src/server.ts"
+    "dev": "nodemon src/server",
+    "start": "ts-node src/server"
   },
   "keywords": [],
   "author": "",
