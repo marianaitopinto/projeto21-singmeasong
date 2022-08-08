@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { jest } from "@jest/globals";
+import { prisma } from "../../src/database";
 
 export function newRecommendation() {
   const recommendation = {
@@ -44,4 +45,20 @@ export function recommendations() {
   ];
 
   return recommendations;
+}
+
+export async function createRecomendations(qty: number) {
+  const array = [];
+
+  for (let i = 0; i < qty; i++) {
+    const recommendation = await prisma.recommendation.create({
+      data: {
+        name: faker.name.firstName(),
+        youtubeLink: `https://www.youtube.com/watch?v=czz9hLjfMCI`,
+      },
+    });
+    array.push(recommendation);
+  }
+
+  return array;
 }

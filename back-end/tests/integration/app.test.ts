@@ -6,6 +6,7 @@ import {
   newRecommendation,
   recommentationWithScore,
   recommendations,
+  createRecomendations,
 } from "../factories/recommendation";
 
 beforeEach(async () => {
@@ -154,7 +155,47 @@ describe("downvote recommendation", () => {
         id: recommendation.id,
       },
     });
-    
+
     expect(checkRecommendation).toBe(null);
+  });
+});
+
+describe("get recommendations", () => {
+  it("should return recommendations", async () => {
+    await createRecomendations(12);
+
+    const { body } = await supertest(app).get("/recommendations/");
+    expect(body).toHaveLength(10);
+  });
+
+  it("should not return recommendation with an invalid id, return 404", async () => {
+    const response = await supertest(app).get(`/recommendations/1`);
+
+    expect(response.status).toBe(404);
+  });
+
+  it("should return a recommendation with a valid id", async () => {
+    await createRecomendations(1);
+
+    const response = await supertest(app).get(`/recommendations/1`);
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("get random recommendation", async () => {
+    await createRecomendations(10);
+
+    const response = await supertest(app).get(`/recommendations/random`);
+
+    expect(response.body).toHaveProperty("id");
+    expect(response.body).toHaveProperty("name");
+    expect(response.body).toHaveProperty("youtubeLink");
+    expect(response.body).toHaveProperty("score");
+  });
+
+  it("should not get a random recommendation having any register, return 404", async () => {
+    const response = await supertest(app).get(`/recommendations/random`);
+
+    expect(response.status).toBe(404);
   });
 });
